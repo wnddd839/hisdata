@@ -20,8 +20,8 @@ public class PharmacyInventoryController {
 
     @Operation(summary = "查询药品库存")
     @GetMapping("/inventory")
-    public GlobalResult<List<PharmacyInventory>> list(@RequestParam(required = false) String name,
-                                                      @RequestParam(required = false) String category) {
+    public GlobalResult<List<PharmacyInventory>> list(@RequestParam(value = "name", required = false) String name,
+                                                      @RequestParam(value = "category", required = false) String category) {
         return GlobalResult.success(inventoryService.list(name, category));
     }
 
@@ -39,10 +39,10 @@ public class PharmacyInventoryController {
 
     @Operation(summary = "发药")
     @PostMapping("/dispense")
-    public GlobalResult<String> dispense(@RequestParam Integer prescriptionId,
-                                         @RequestParam Integer medicineId,
-                                         @RequestParam Integer quantity,
-                                         @RequestParam String operator) {
+    public GlobalResult<String> dispense(@RequestParam("prescriptionId") Integer prescriptionId,
+                                         @RequestParam("medicineId") Integer medicineId,
+                                         @RequestParam("quantity") Integer quantity,
+                                         @RequestParam("operator") String operator) {
         inventoryService.dispenseMedicine(prescriptionId, medicineId, quantity, operator);
         return GlobalResult.success("发药成功");
     }

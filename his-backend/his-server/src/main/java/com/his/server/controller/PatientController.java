@@ -20,7 +20,7 @@ public class PatientController {
 
     @Operation(summary = "搜索患者(按姓名)")
     @GetMapping("/search")
-    public GlobalResult<List<Patient>> search(@RequestParam String name) {
+    public GlobalResult<List<Patient>> search(@RequestParam("name") String name) {
         return GlobalResult.success(patientService.searchByName(name));
     }
 
@@ -32,7 +32,7 @@ public class PatientController {
     
     @Operation(summary = "获取患者详情")
     @GetMapping("/{id}")
-    public GlobalResult<Patient> getById(@PathVariable Integer id) {
+    public GlobalResult<Patient> getById(@PathVariable("id") Integer id) {
         return GlobalResult.success(patientService.getById(id));
     }
 }

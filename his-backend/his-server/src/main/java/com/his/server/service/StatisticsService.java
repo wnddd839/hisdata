@@ -1,54 +1,86 @@
 package com.his.server.service;
 
-import com.his.server.entity.Statistics;
+import com.his.server.entity.Doctor;
 import com.his.server.repository.AppointmentRepository;
+import com.his.server.repository.DoctorRepository;
 import com.his.server.repository.FinanceRepository;
-import com.his.server.repository.StatisticsRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class StatisticsService {
 
-    private final StatisticsRepository statisticsRepository;
-    private final AppointmentRepository appointmentRepository;
     private final FinanceRepository financeRepository;
+    private final AppointmentRepository appointmentRepository;
+    private final DoctorRepository doctorRepository;
 
-    @Scheduled(cron = "0 0 1 * * ?") // 每天凌晨1点执行
-    @Transactional
-    public void calculateDailyStats() {
-        LocalDate yesterday = LocalDate.now().minusDays(1);
-        calculateStatsForDate(yesterday);
+    public Map<String, Object> getDailyStats() {
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfDay = LocalDateTime.of(today, LocalTime.MIN);
+        LocalDateTime endOfDay = LocalDateTime.of(today, LocalTime.MAX);
+
+        BigDecimal todayRevenue = financeRepository.sumTotalFeeByPaymentStatusAndPaymentTimeBetween("已支付", startOfDay, endOfDay);
+        long todayAppointments = appointmentRepository.countByRegistrationDate(today);
+
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("date", today);
+        stats.put("revenue", todayRevenue);
+        stats.put("appointments", todayAppointments);
+        return stats;
     }
 
-    @Transactional
-    public void calculateStatsForDate(LocalDate date) {
-        // 1. 统计日挂号量
-        long registrationCount = appointmentRepository.countByRegistrationDate(date); 
-        saveStat("日挂号量", date, BigDecimal.valueOf(registrationCount));
+    public Map<String, Object> getRevenueStats() {
+        // Last 7 days
+        List<Map<String, Object>> result = new ArrayList<>();
+        LocalDate today = LocalDate.now();
 
-        // 2. 统计日收入
-        BigDecimal dailyIncome = financeRepository.sumTotalFeeByDate(date);
-        saveStat("日总收入", date, dailyIncome);
-    }
-    
-    private void saveStat(String type, LocalDate date, BigDecimal value) {
-        Statistics stat = statisticsRepository.findByStatisticTypeAndStatisticDate(type, date)
-                .orElse(new Statistics());
-        stat.setStatisticType(type);
-        stat.setStatisticDate(date);
-        stat.setValue(value);
-        statisticsRepository.save(stat);
+        for (int i = 6; i >= 0; i--) {
+            LocalDate date = today.minusDays(i);
+            LocalDateTime start = LocalDateTime.of(date, LocalTime.MIN);
+            LocalDateTime end = LocalDateTime.of(date, LocalTime.MAX);
+            
+            BigDecimal revenue = financeRepository.sumTotalFeeByPaymentStatusAndPaymentTimeBetween("已支付", start, end);
+            
+            Map<String, Object> dayStat = new HashMap<>();
+            dayStat.put("date", date);
+            dayStat.put("revenue", revenue);
+            result.add(dayStat);
+        }
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("chartData", result);
+        return response;
     }
 
-    public List<Statistics> listByDate(LocalDate date) {
-        return statisticsRepository.findByStatisticDate(date);
+    public List<Map<String, Object>> getTopDoctors() {
+        List<Object[]> results = appointmentRepository.findTopDoctors(PageRequest.of(0, 5));
+        List<Map<String, Object>> topDoctors = new ArrayList<>();
+
+        for (Object[] row : results) {
+            Integer doctorId = (Integer) row[0];
+            Long count = (Long) row[1];
+            
+            Doctor doctor = doctorRepository.findById(doctorId).orElse(null);
+            if (doctor != null) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("doctorId", doctor.getDoctorId());
+                map.put("name", doctor.getName());
+                map.put("department", doctor.getDepartment());
+                map.put("appointmentCount", count);
+                topDoctors.add(map);
+            }
+        }
+        return topDoctors;
     }
 }

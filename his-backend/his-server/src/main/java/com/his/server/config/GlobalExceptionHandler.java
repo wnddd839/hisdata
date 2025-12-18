@@ -19,6 +19,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public GlobalResult<Void> handleException(Exception e) {
         log.error("系统异常", e);
-        return GlobalResult.error("系统繁忙，请稍后重试");
+        return GlobalResult.error("系统繁忙，请稍后重试: " + e.getMessage());
     }
 }

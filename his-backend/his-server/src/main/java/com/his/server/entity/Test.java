@@ -25,6 +25,9 @@ public class Test extends BaseEntity {
     @Column(name = "pid", nullable = false)
     private Integer pid;
 
+    @Column(name = "patient_id", nullable = false)
+    private Integer patientId;
+
     @Column(name = "doctor_id", nullable = false)
     private Integer doctorId;
 
@@ -45,4 +48,15 @@ public class Test extends BaseEntity {
 
     @Column(nullable = false)
     private Integer status; // 1=申请中, 2=已完成
+
+    @PrePersist
+    @PreUpdate
+    public void syncPid() {
+        if (this.pid == null && this.patientId != null) {
+            this.pid = this.patientId;
+        }
+        if (this.patientId == null && this.pid != null) {
+            this.patientId = this.pid;
+        }
+    }
 }

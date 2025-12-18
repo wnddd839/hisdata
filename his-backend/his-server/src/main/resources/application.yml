@@ -1,11 +1,21 @@
 server:
   port: 8080
+  servlet:
+    session:
+      cookie:
+        name: HIS_SESSION
+        http-only: true
+        same-site: Lax
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 
 spring:
   application:
     name: his-server
   datasource:
-    url: jdbc:mysql://localhost:3306/his_db?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/his_db?useUnicode=true&characterEncoding=utf8&connectionCollation=utf8mb4_unicode_ci&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
     password: "123456"
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -17,6 +27,8 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.MySQL8Dialect
+        hbm2ddl:
+          charset_name: utf8mb4
 
   
 # MinIO Config

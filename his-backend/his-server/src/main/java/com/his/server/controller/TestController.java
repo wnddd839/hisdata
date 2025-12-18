@@ -27,21 +27,21 @@ public class TestController {
 
     @Operation(summary = "查询患者检查")
     @GetMapping("/patient/{pid}")
-    public GlobalResult<List<Test>> listByPatient(@PathVariable Integer pid) {
+    public GlobalResult<List<Test>> listByPatient(@PathVariable("pid") Integer pid) {
         return GlobalResult.success(testService.listByPatient(pid));
     }
 
     @Operation(summary = "查询挂号单检查")
     @GetMapping("/appointment/{appointmentId}")
-    public GlobalResult<List<Test>> listByAppointment(@PathVariable Integer appointmentId) {
+    public GlobalResult<List<Test>> listByAppointment(@PathVariable("appointmentId") Integer appointmentId) {
         return GlobalResult.success(testService.listByAppointment(appointmentId));
     }
 
     @Operation(summary = "更新检查状态/结果")
     @PutMapping("/{testId}/status")
-    public GlobalResult<Test> updateStatus(@PathVariable Integer testId,
-                                           @RequestParam Integer status,
-                                           @RequestParam(required = false) String result) {
+    public GlobalResult<Test> updateStatus(@PathVariable("testId") Integer testId,
+                                           @RequestParam("status") Integer status,
+                                           @RequestParam(value = "result", required = false) String result) {
         return GlobalResult.success(testService.updateStatus(testId, status, result));
     }
 }

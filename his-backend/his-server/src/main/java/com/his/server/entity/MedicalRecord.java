@@ -21,6 +21,9 @@ public class MedicalRecord extends BaseEntity {
     @Column(name = "pid", nullable = false)
     private Integer pid;
 
+    @Column(name = "patient_id", nullable = false)
+    private Integer patientId;
+
     @Column(name = "doctor_id", nullable = false)
     private Integer doctorId;
 
@@ -38,4 +41,15 @@ public class MedicalRecord extends BaseEntity {
 
     @Column(name = "preliminary_diagnosis", nullable = false, columnDefinition = "TEXT")
     private String preliminaryDiagnosis;
+
+    @PrePersist
+    @PreUpdate
+    public void syncPid() {
+        if (this.pid == null && this.patientId != null) {
+            this.pid = this.patientId;
+        }
+        if (this.patientId == null && this.pid != null) {
+            this.patientId = this.pid;
+        }
+    }
 }

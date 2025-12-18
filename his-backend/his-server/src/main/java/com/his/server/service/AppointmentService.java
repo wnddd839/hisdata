@@ -24,7 +24,11 @@ public class AppointmentService {
     private final DoctorRepository doctorRepository;
 
     public List<Appointment> listByPatient(Integer pid) {
-        return appointmentRepository.findByPid(pid);
+        try {
+            return appointmentRepository.findByPidOrPatientId(pid, pid);
+        } catch (Exception e) {
+            throw new BusinessException(500, "查询挂号记录失败: " + e.getMessage());
+        }
     }
 
     @Transactional
@@ -40,6 +44,7 @@ public class AppointmentService {
         // 3. 创建挂号单
         Appointment appointment = new Appointment();
         appointment.setPid(patient.getPid());
+        appointment.setPatientId(patient.getPid());
         appointment.setDoctorId(doctor.getDoctorId());
         appointment.setDepartment(dto.getDepartment());
         appointment.setRegistrationDate(dto.getRegistrationDate());
@@ -48,6 +53,30 @@ public class AppointmentService {
         appointment.setStatus(1); // 1=待就诊
 
         // 4. 保存
+        return appointmentRepository.save(appointment);
+    }
+
+    @Transactional
+    public Appointment createAppointmentBySession(Integer pid, AppointmentDTO dto) {
+        if (pid == null) {
+            throw new BusinessException(401, "未登录");
+        }
+
+        Patient patient = patientRepository.findById(pid)
+            .orElseThrow(() -> new BusinessException("患者不存在"));
+
+        Doctor doctor = doctorRepository.findById(dto.getDoctorId())
+            .orElseThrow(() -> new BusinessException("医生不存在"));
+
+        Appointment appointment = new Appointment();
+        appointment.setPid(patient.getPid());
+        appointment.setPatientId(patient.getPid());
+        appointment.setDoctorId(doctor.getDoctorId());
+        appointment.setDepartment(dto.getDepartment());
+        appointment.setRegistrationDate(dto.getRegistrationDate());
+        appointment.setRegistrationTime(LocalTime.now());
+        appointment.setRegistrationFee(dto.getRegistrationFee());
+        appointment.setStatus(1);
         return appointmentRepository.save(appointment);
     }
 

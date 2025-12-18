@@ -20,7 +20,7 @@ public class DoctorController {
 
     @Operation(summary = "查询医生列表(可按科室筛选)")
     @GetMapping
-    public GlobalResult<List<Doctor>> list(@RequestParam(required = false) String department) {
+    public GlobalResult<List<Doctor>> list(@RequestParam(value = "department", required = false) String department) {
         return GlobalResult.success(doctorService.list(department));
     }
 

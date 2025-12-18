@@ -27,7 +27,7 @@ public class PrescriptionController {
 
     @Operation(summary = "查询患者处方")
     @GetMapping("/patient/{pid}")
-    public GlobalResult<List<Prescription>> listByPatient(@PathVariable Integer pid) {
+    public GlobalResult<List<Prescription>> listByPatient(@PathVariable("pid") Integer pid) {
         return GlobalResult.success(prescriptionService.listByPatient(pid));
     }
 }

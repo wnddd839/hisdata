@@ -27,13 +27,13 @@ public class MedicalRecordController {
 
     @Operation(summary = "查询患者病历")
     @GetMapping("/patient/{pid}")
-    public GlobalResult<List<MedicalRecord>> listByPatient(@PathVariable Integer pid) {
+    public GlobalResult<List<MedicalRecord>> listByPatient(@PathVariable("pid") Integer pid) {
         return GlobalResult.success(medicalRecordService.listByPatient(pid));
     }
 
     @Operation(summary = "查询挂号单病历")
     @GetMapping("/appointment/{appointmentId}")
-    public GlobalResult<List<MedicalRecord>> listByAppointment(@PathVariable Integer appointmentId) {
+    public GlobalResult<List<MedicalRecord>> listByAppointment(@PathVariable("appointmentId") Integer appointmentId) {
         return GlobalResult.success(medicalRecordService.listByAppointment(appointmentId));
     }
 }
