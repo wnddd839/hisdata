@@ -6,6 +6,7 @@ import com.his.server.service.DiscountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,18 +21,21 @@ public class DiscountController {
 
     @Operation(summary = "查询当前有效优惠")
     @GetMapping("/active")
+    @PreAuthorize("hasAnyAuthority('ROLE_PATIENT', 'ROLE_DOCTOR', 'ROLE_ADMIN')")
     public GlobalResult<List<Discount>> listActive() {
         return GlobalResult.success(discountService.listActive());
     }
 
     @Operation(summary = "根据优惠码查询")
     @GetMapping("/code/{code}")
+    @PreAuthorize("hasAnyAuthority('ROLE_PATIENT', 'ROLE_DOCTOR', 'ROLE_ADMIN')")
     public GlobalResult<Discount> getByCode(@PathVariable("code") String code) {
         return GlobalResult.success(discountService.getValidByCode(code));
     }
 
     @Operation(summary = "创建或更新优惠")
     @PostMapping
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public GlobalResult<Discount> save(@RequestBody Discount discount) {
         return GlobalResult.success(discountService.save(discount));
     }

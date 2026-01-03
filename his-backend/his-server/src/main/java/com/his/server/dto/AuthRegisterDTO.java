@@ -11,5 +11,6 @@ public class AuthRegisterDTO {
     private Integer age;
     private String address;
     private String allergy;
+    private String idCard;
 }
 

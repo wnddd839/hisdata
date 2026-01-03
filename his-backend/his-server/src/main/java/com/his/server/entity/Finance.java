@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "finance", indexes = {
+    @Index(name = "idx_pid", columnList = "pid"),
     @Index(name = "idx_appt_pres", columnList = "appointment_id, prescription_id"),
     @Index(name = "idx_status_created", columnList = "payment_status, created_at"),
     @Index(name = "idx_created_total", columnList = "created_at, total_fee")
@@ -21,6 +22,9 @@ public class Finance extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "finance_id")
     private Integer financeId;
+
+    @Column(name = "pid", nullable = false)
+    private Integer pid;
 
     @Column(name = "appointment_id", nullable = false)
     private Integer appointmentId;

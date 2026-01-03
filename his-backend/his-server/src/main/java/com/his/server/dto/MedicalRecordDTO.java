@@ -11,4 +11,6 @@ public class MedicalRecordDTO {
     private String presentIllness;
     private String physicalExamination;
     private String preliminaryDiagnosis;
+    private String treatmentPlan;
+    private String notes;
 }

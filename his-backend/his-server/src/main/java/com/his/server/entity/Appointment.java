@@ -1,5 +1,6 @@
 package com.his.server.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -27,11 +28,29 @@ public class Appointment extends BaseEntity {
     @Column(name = "pid", nullable = false)
     private Integer pid;
 
+    /**
+     * @deprecated 使用 {@link #pid} 代替
+     * 仅用于数据库兼容性,API响应中不会返回此字段
+     */
+    @Deprecated
     @Column(name = "patient_id", nullable = false)
+    @JsonIgnore
     private Integer patientId;
+
+    @Column(name = "patient_name", length = 50)
+    private String patientName;
 
     @Column(name = "doctor_id", nullable = false)
     private Integer doctorId;
+
+    @Column(name = "doctor_name", length = 50)
+    private String doctorName;
+
+    @Column(name = "schedule_id")
+    private Integer scheduleId;
+
+    @Column(name = "serial_number")
+    private Integer serialNumber;
 
     @Column(nullable = false, length = 50)
     private String department;
@@ -46,7 +65,7 @@ public class Appointment extends BaseEntity {
     private BigDecimal registrationFee;
 
     @Column(nullable = false)
-    private Integer status; // 1=待就诊, 2=就诊中, 3=已完成
+    private Integer status; // 0=已取消, 1=待就诊, 2=就诊中, 3=已完成
 
     @Column(name = "call_number_time")
     private LocalDateTime callNumberTime;

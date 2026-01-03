@@ -13,7 +13,11 @@ import java.util.List;
 @Repository
 public interface FinanceRepository extends JpaRepository<Finance, Integer> {
     List<Finance> findByAppointmentId(Integer appointmentId);
-    
+
+    List<Finance> findByPid(Integer pid);
+
+    List<Finance> findByPidAndPaymentStatus(Integer pid, String paymentStatus);
+
     @Query("SELECT COALESCE(SUM(f.totalFee), 0) FROM Finance f WHERE f.paymentStatus = :status AND f.paymentTime BETWEEN :start AND :end")
     BigDecimal sumTotalFeeByPaymentStatusAndPaymentTimeBetween(@Param("status") String status, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 }

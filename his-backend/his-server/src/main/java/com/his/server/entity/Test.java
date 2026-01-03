@@ -1,5 +1,6 @@
 package com.his.server.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -25,7 +26,13 @@ public class Test extends BaseEntity {
     @Column(name = "pid", nullable = false)
     private Integer pid;
 
+    /**
+     * @deprecated 使用 {@link #pid} 代替
+     * 仅用于数据库兼容性,API响应中不会返回此字段
+     */
+    @Deprecated
     @Column(name = "patient_id", nullable = false)
+    @JsonIgnore
     private Integer patientId;
 
     @Column(name = "doctor_id", nullable = false)
@@ -47,7 +54,7 @@ public class Test extends BaseEntity {
     private String result;
 
     @Column(nullable = false)
-    private Integer status; // 1=申请中, 2=已完成
+    private Integer status = 0; // 0=未支付, 1=待检查, 2=已完成
 
     @PrePersist
     @PreUpdate

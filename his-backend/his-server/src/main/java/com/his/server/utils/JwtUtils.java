@@ -23,11 +23,12 @@ public class JwtUtils {
         return Keys.hmacShaKeyFor(SECRET.getBytes());
     }
 
-    public String generateToken(Integer userId, Integer pid, String phone) {
+    public String generateToken(Integer userId, Integer pid, String phone, String role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("uid", userId);
         claims.put("pid", pid);
         claims.put("phone", phone);
+        claims.put("role", role);
         return createToken(claims, String.valueOf(userId));
     }
 
@@ -58,6 +59,11 @@ public class JwtUtils {
     public Integer extractPid(String token) {
         final Claims claims = extractAllClaims(token);
         return claims.get("pid", Integer.class);
+    }
+
+    public String extractRole(String token) {
+        final Claims claims = extractAllClaims(token);
+        return claims.get("role", String.class);
     }
 
     private Boolean isTokenExpired(String token) {

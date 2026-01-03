@@ -42,11 +42,16 @@ public class FinanceService {
         List<Test> tests = testRepository.findByAppointmentId(appointmentId);
 
         BigDecimal regFee = appointment.getRegistrationFee();
+        if (regFee == null) {
+            regFee = BigDecimal.ZERO;
+        }
         BigDecimal medicineFee = prescriptions.stream()
                 .map(Prescription::getTotalCost)
+                .filter(java.util.Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal testFee = tests.stream()
                 .map(Test::getTestFee)
+                .filter(java.util.Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal totalFee = regFee.add(medicineFee).add(testFee);
@@ -63,6 +68,7 @@ public class FinanceService {
         BigDecimal finalTotal = totalFee.subtract(discountAmount);
 
         Finance finance = new Finance();
+        finance.setPid(appointment.getPid()); // 设置就诊卡号关联
         finance.setAppointmentId(appointmentId);
         finance.setRegistrationFee(regFee);
         finance.setMedicineFee(medicineFee);
@@ -100,10 +106,40 @@ public class FinanceService {
         finance.setPaymentStatus("已支付");
         finance.setPaymentTime(LocalDateTime.now());
         
+        // Update prescription status to 1 (To be dispensed)
+        List<Prescription> prescriptions = prescriptionRepository.findByAppointmentId(finance.getAppointmentId());
+        for (Prescription p : prescriptions) {
+            if (p.getStatus() == null || p.getStatus() == 0) {
+                p.setStatus(1);
+                prescriptionRepository.save(p);
+            }
+        }
+
+        // Update test status to 1 (Pending Exam)
+        List<Test> tests = testRepository.findByAppointmentId(finance.getAppointmentId());
+        for (Test t : tests) {
+            if (t.getStatus() == null || t.getStatus() == 0) {
+                t.setStatus(1);
+                testRepository.save(t);
+            }
+        }
+        
         return financeRepository.save(finance);
     }
 
     public List<Finance> listByAppointment(Integer appointmentId) {
         return financeRepository.findByAppointmentId(appointmentId);
+    }
+
+    public List<Finance> listByPid(Integer pid) {
+        return financeRepository.findByPid(pid);
+    }
+
+    public List<Finance> listByPidAndStatus(Integer pid, String paymentStatus) {
+        return financeRepository.findByPidAndPaymentStatus(pid, paymentStatus);
+    }
+
+    public Finance getById(Integer financeId) {
+        return financeRepository.findById(financeId).orElse(null);
     }
 }

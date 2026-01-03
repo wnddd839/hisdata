@@ -63,7 +63,7 @@ public class FileController {
 
     @Operation(summary = "文件下载/预览")
     @GetMapping("/{fileName}")
-    public void download(@PathVariable String fileName, HttpServletResponse response) {
+    public void download(@PathVariable("fileName") String fileName, HttpServletResponse response) {
         File file = new File(fileConfig.getUploadPath(), fileName);
         if (!file.exists()) {
             throw new BusinessException("文件不存在");

@@ -1,5 +1,6 @@
 package com.his.server.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,7 +25,13 @@ public class Prescription extends BaseEntity {
     @Column(name = "pid", nullable = false)
     private Integer pid;
 
+    /**
+     * @deprecated 使用 {@link #pid} 代替
+     * 仅用于数据库兼容性,API响应中不会返回此字段
+     */
+    @Deprecated
     @Column(name = "patient_id", nullable = false)
+    @JsonIgnore
     private Integer patientId;
 
     @Column(name = "doctor_id", nullable = false)
@@ -53,6 +60,9 @@ public class Prescription extends BaseEntity {
 
     @Column(name = "total_cost", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalCost;
+
+    @Column(nullable = false)
+    private Integer status = 0; // 0=未支付, 1=待发药, 2=已发药
 
     @PrePersist
     @PreUpdate

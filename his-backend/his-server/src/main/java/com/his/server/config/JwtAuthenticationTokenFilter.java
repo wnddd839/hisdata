@@ -5,7 +5,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,6 +15,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Slf4j
 @Component
@@ -27,46 +28,36 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        
+
+        // 只处理JWT token
         final String authHeader = request.getHeader("Authorization");
-        log.info("JWT Filter: uri={}, header={}", request.getRequestURI(), authHeader);
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String jwt = authHeader.substring(7);
-            log.info("JWT extracted: {}...", jwt.substring(0, Math.min(jwt.length(), 10)));
             try {
                 if (jwtUtils.validateToken(jwt)) {
                     Integer userId = jwtUtils.extractUserId(jwt);
-                    Integer pid = jwtUtils.extractPid(jwt);
-                    log.info("JWT valid. uid={}, pid={}", userId, pid);
+                    String role = jwtUtils.extractRole(jwt);
 
-                    // Create Authentication
+                    List<SimpleGrantedAuthority> authorities = role != null
+                            ? Collections.singletonList(new SimpleGrantedAuthority(role))
+                            : Collections.emptyList();
+
+                    // 创建认证对象
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            userId, null, Collections.emptyList());
+                            userId, null, authorities);
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                    // Bridge to legacy Session-based controllers
-                    // This ensures existing controllers that use request.getSession().getAttribute("uid") still work
-                    HttpSession session = request.getSession(true);
-                    log.info("JWT Filter: processing request {}, session={}", request.getRequestURI(), session.getId());
-                    if (session.getAttribute("uid") == null) {
-                         session.setAttribute("uid", userId);
-                         session.setAttribute("pid", pid);
-                         log.info("JWT validated. Populated HttpSession {} with uid: {}, pid: {}", session.getId(), userId, pid);
-                    } else {
-                         log.info("Session {} already has uid: {}", session.getId(), session.getAttribute("uid"));
-                    }
+                    log.debug("JWT认证成功: userId={}, role={}", userId, role);
                 } else {
-                    log.warn("JWT invalid");
+                    log.warn("JWT token无效");
                 }
             } catch (Exception e) {
-                log.warn("JWT processing failed: {}", e.getMessage());
-                e.printStackTrace();
+                log.warn("JWT处理失败: {}", e.getMessage());
             }
-        } else {
-            log.info("No Bearer header found");
         }
+
         chain.doFilter(request, response);
     }
 }

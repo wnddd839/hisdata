@@ -42,6 +42,12 @@ public class MedicalRecord extends BaseEntity {
     @Column(name = "preliminary_diagnosis", nullable = false, columnDefinition = "TEXT")
     private String preliminaryDiagnosis;
 
+    @Column(name = "treatment_plan", columnDefinition = "TEXT")
+    private String treatmentPlan;
+
+    @Column(name = "notes", columnDefinition = "TEXT")
+    private String notes;
+
     @PrePersist
     @PreUpdate
     public void syncPid() {
