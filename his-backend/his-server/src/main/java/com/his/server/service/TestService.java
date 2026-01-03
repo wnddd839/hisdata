@@ -44,6 +44,10 @@ public class TestService {
         return testRepository.findByDoctorId(doctorId); // 查询医生所有检查（不限制状态）
     }
 
+    public List<Test> listByPidAndStatus(Integer pid, Integer status) {
+        return testRepository.findByPidAndStatus(pid, status);
+    }
+
     @Transactional
     public Test createTest(TestDTO dto) {
         if (dto.getAppointmentId() == null) {

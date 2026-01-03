@@ -76,6 +76,12 @@ public class Appointment extends BaseEntity {
     @Column(name = "consult_end_time")
     private LocalDateTime consultEndTime;
 
+    @Column(name = "payment_status", length = 20)
+    private String paymentStatus; // 未支付, 已支付
+
+    @Column(name = "payment_time")
+    private LocalDateTime paymentTime;
+
     @PrePersist
     @PreUpdate
     public void syncPid() {

@@ -98,32 +98,37 @@ public class FinanceService {
     public Finance pay(Integer financeId) {
         Finance finance = financeRepository.findById(financeId)
                 .orElseThrow(() -> new BusinessException("账单不存在"));
-        
+
         if ("已支付".equals(finance.getPaymentStatus())) {
             throw new BusinessException("账单已支付");
         }
 
         finance.setPaymentStatus("已支付");
         finance.setPaymentTime(LocalDateTime.now());
-        
-        // Update prescription status to 1 (To be dispensed)
+
+        // 只更新未支付的处方和检查单状态，避免状态冲突
+        // 如果处方/检查已经单独支付过（status=1），则跳过
         List<Prescription> prescriptions = prescriptionRepository.findByAppointmentId(finance.getAppointmentId());
         for (Prescription p : prescriptions) {
+            // 只更新状态为0（未支付）的处方
             if (p.getStatus() == null || p.getStatus() == 0) {
-                p.setStatus(1);
+                p.setStatus(1); // 1=待发药
                 prescriptionRepository.save(p);
             }
+            // status=1（已单独支付）或status=2（已发药）的保持不变
         }
 
-        // Update test status to 1 (Pending Exam)
+        // 只更新未支付的检查单状态
         List<Test> tests = testRepository.findByAppointmentId(finance.getAppointmentId());
         for (Test t : tests) {
+            // 只更新状态为0（未支付）的检查单
             if (t.getStatus() == null || t.getStatus() == 0) {
-                t.setStatus(1);
+                t.setStatus(1); // 1=待检查
                 testRepository.save(t);
             }
+            // status=1（已单独支付）或status=2（已完成）的保持不变
         }
-        
+
         return financeRepository.save(finance);
     }
 

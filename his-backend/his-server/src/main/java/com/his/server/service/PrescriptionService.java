@@ -34,6 +34,10 @@ public class PrescriptionService {
         return prescriptionRepository.findByAppointmentId(appointmentId);
     }
 
+    public List<Prescription> listByPidAndStatus(Integer pid, Integer status) {
+        return prescriptionRepository.findByPidAndStatus(pid, status);
+    }
+
     public void checkStock(Integer medicineId, Integer quantity) {
         inventoryService.checkStock(medicineId, quantity);
     }

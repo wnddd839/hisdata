@@ -3,9 +3,7 @@ package com.his.server.controller;
 import com.his.common.result.GlobalResult;
 import com.his.server.dto.PrescriptionDTO;
 import com.his.server.entity.Prescription;
-import com.his.server.service.PatientService;
 import com.his.server.service.PrescriptionService;
-import com.his.server.utils.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -22,20 +20,12 @@ import java.util.Map;
 public class PrescriptionController {
 
     private final PrescriptionService prescriptionService;
-    private final PatientService patientService;
 
     @Operation(summary = "开具处方")
     @PostMapping
     @PreAuthorize("hasAuthority('ROLE_DOCTOR')")
     public GlobalResult<Prescription> create(@RequestBody PrescriptionDTO dto) {
         return GlobalResult.success(prescriptionService.createPrescription(dto));
-    }
-
-    @Operation(summary = "开具处方（前端专用路径）")
-    @PostMapping("/create")
-    @PreAuthorize("hasAuthority('ROLE_DOCTOR')")
-    public GlobalResult<Prescription> createWithPath(@RequestBody PrescriptionDTO dto) {
-        return create(dto);
     }
 
     @Operation(summary = "批量开具处方")
@@ -78,23 +68,6 @@ public class PrescriptionController {
     @PreAuthorize("hasAuthority('ROLE_PATIENT')")
     public GlobalResult<Map<String, Object>> listMyUnpaid() {
         return GlobalResult.success(prescriptionService.listMyUnpaid());
-    }
-
-    @Operation(summary = "查询我的处方")
-    @GetMapping("/my-prescriptions")
-    @PreAuthorize("hasAuthority('ROLE_PATIENT')")
-    public GlobalResult<List<Prescription>> listMyPrescriptions() {
-        var patient = patientService.getCurrentPatient(SecurityUtils.getCurrentUserId());
-        return GlobalResult.success(prescriptionService.listByPatient(patient.getPid()));
-    }
-
-    @Operation(summary = "更新处方状态")
-    @PutMapping("/{prescriptionId}/status")
-    @PreAuthorize("hasAnyAuthority('ROLE_PHARMACIST', 'ROLE_ADMIN')")
-    public GlobalResult<Prescription> updateStatus(
-            @PathVariable("prescriptionId") Integer prescriptionId,
-            @RequestParam("status") Integer status) {
-        return GlobalResult.success(prescriptionService.updateStatus(prescriptionId, status));
     }
 
     @lombok.Data

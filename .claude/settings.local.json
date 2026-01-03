@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mvn clean compile:*)",
+      "Bash(Select-String:*)",
+      "Bash(mvn test:*)",
+      "Bash(find:*)",
+      "Bash(cd:*)",
+      "Edit",
+      "Bash(del:*)",
+      "Read(D:\\前端\\aiweb\\platform\\his-system\\前端对接报告.md)",
+      "Bash(ls:*)",
+      "Bash(dir:*)",
+      "Bash(git:*)"
+    ]
+  }
+}
